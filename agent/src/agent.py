@@ -9,6 +9,9 @@ from pydantic_ai.models.openai import OpenAIResponsesModel
 from dotenv import load_dotenv
 load_dotenv()
 
+# Database integration (optional)
+from database import get_proverbs_from_db, save_proverbs_to_db, delete_proverb_from_db
+
 # =====
 # State
 # =====
@@ -48,6 +51,13 @@ def get_proverbs(ctx: RunContext[StateDeps[ProverbsState]]) -> list[str]:
 @agent.tool
 async def add_proverbs(ctx: RunContext[StateDeps[ProverbsState]], proverbs: list[str]) -> StateSnapshotEvent:
   ctx.deps.state.proverbs.extend(proverbs)
+  
+  # Save to database
+  try:
+    await save_proverbs_to_db(ctx.deps.state.proverbs)
+  except Exception as e:
+    print(f"Warning: Could not save to database: {e}")
+  
   return StateSnapshotEvent(
     type=EventType.STATE_SNAPSHOT,
     snapshot=ctx.deps.state,
@@ -56,6 +66,13 @@ async def add_proverbs(ctx: RunContext[StateDeps[ProverbsState]], proverbs: list
 @agent.tool
 async def set_proverbs(ctx: RunContext[StateDeps[ProverbsState]], proverbs: list[str]) -> StateSnapshotEvent:
   ctx.deps.state.proverbs = proverbs
+  
+  # Save to database
+  try:
+    await save_proverbs_to_db(ctx.deps.state.proverbs)
+  except Exception as e:
+    print(f"Warning: Could not save to database: {e}")
+  
   return StateSnapshotEvent(
     type=EventType.STATE_SNAPSHOT,
     snapshot=ctx.deps.state,

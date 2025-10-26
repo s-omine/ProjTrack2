@@ -10,4 +10,6 @@ dependencies = [
     "pydantic-ai-slim[openai]",
     "python-dotenv",
     "logfire>=4.10.0",
+    "asyncpg",
+    "psycopg2-binary",
 ]
